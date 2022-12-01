@@ -20,15 +20,10 @@ try:
         cursor.execute("select database();")
         record = cursor.fetchone()
         print("You're connected to database: ", record)
-
-#        cursor.execute(sql, val)
-#        connection.commit()
-    #    print(cursor.rowcount, "Record inserted")
-
                 #Interfejs aplikacji
         customtkinter.set_appearance_mode("System")
         customtkinter.set_default_color_theme("dark-blue")
-        
+
         app = customtkinter.CTk()
         app.geometry("400x240")
         mainframe= customtkinter.CTkFrame(app, padx=1, pady=1, fg_color="#ADD8E6")
@@ -36,30 +31,52 @@ try:
         mainframe.grid(column=0, row=0, sticky="nsew")
         app.columnconfigure(0, weight=1)
         app.rowconfigure(0, weight=1)
-        
-        entry = customtkinter.CTkEntry(master=app, placeholder_text="Dane do dodania")
-        entry.place(relx=0.5, rely=0.3, anchor=customtkinter.CENTER)
-        
-        
 
-        def Dodaj_przyklad(): #Guzik
-                sql = "INSERT INTO autor (idAutora, nazwaAutora, fotkaAutora) VALUES (%s, %s, %s)" #Dodaje nowego autora
-                val = (1, "Tentacooler", "http://pokemonmeme.com/cache/70f8b164/ava2b422db4b70224cd3d.png")
-                cursor.execute(sql, val)
-                connection.commit()
-                print(cursor.rowcount, "Record inserted")
-                
-        button = customtkinter.CTkButton(master=app, text="Dodaj przykładowe dane do bazy danych", command=Dodaj_przyklad)
-        button.place(relx=0.5, rely=0.5, anchor=customtkinter.CENTER)
-        
-        def usun_przyklad(): #Guzik
-                sql = "DELETE FROM autor WHERE idAutora = 1" #Usuwa dane z autora
-                cursor.execute(sql)
-                connection.commit()
-                print(cursor.rowcount, "Records deleted")
-        
-        button = customtkinter.CTkButton(master=app, text="Usuń przykładowe dane", command=usun_przyklad)
-        button.place(relx=0.5, rely=0.7, anchor=customtkinter.CENTER)
+        login_textbox = customtkinter.CTkTextbox(app, fg_color="#ADD8E6") #Text proszący o login i hasło
+        login_textbox.grid(row=0, column=0)
+        login_textbox.insert("0.0", "Podaj login i hasło")
+        login_textbox.configure(state="disabled")
+
+
+        login_entry = customtkinter.CTkEntry(master=app, placeholder_text="Login") #Pole login
+        login_entry.place(relx=0.5, rely=0.3, anchor=customtkinter.CENTER)
+
+        password_entry = customtkinter.CTkEntry(master=app, placeholder_text="Hasło", text_color="White") #Pole Hasło
+        password_entry.place(relx=0.5, rely=0.4, anchor=customtkinter.CENTER)
+
+
+        # def Dodaj_przyklad(): #Guzik
+        #         sql = "INSERT INTO autor (idAutora, nazwaAutora, fotkaAutora) VALUES (%s, %s, %s)" #Dodaje nowego autora
+        #         val = (1, "Tentacooler", "http://pokemonmeme.com/cache/70f8b164/ava2b422db4b70224cd3d.png")
+        #         cursor.execute(sql, val)
+        #         connection.commit()
+        #         print(cursor.rowcount, "Record inserted")
+        #
+        # button = customtkinter.CTkButton(master=app, text="Dodaj przykładowe dane do bazy danych", command=Dodaj_przyklad)
+        # button.place(relx=0.5, rely=0.65, anchor=customtkinter.CENTER)
+
+
+        def Login():
+            pass #W tym miejscu ma być funkcja logowania. Pobierz login i hasło z login_entry i password_entry.
+
+        button = customtkinter.CTkButton(master=app, text="Zaloguj", command=Login)
+        button.place(relx=0.5, rely=0.525, anchor=customtkinter.CENTER)
+
+        def Register():
+            pass #W tym miejscu ma być funkcja Rejestrowania. Pobierz login i hasło z login_entry i password_entry.
+
+        button = customtkinter.CTkButton(master=app, text="Zarejestruj", command=Login)
+        button.place(relx=0.5, rely=0.65, anchor=customtkinter.CENTER)
+
+
+        # def usun_przyklad():
+        #         sql = "DELETE FROM autor WHERE idAutora = 1" #Usuwa dane z autora
+        #         cursor.execute(sql)
+        #         connection.commit()
+        #         print(cursor.rowcount, "Records deleted")
+        #
+        # button = customtkinter.CTkButton(master=app, text="Usuń przykładowe dane", command=usun_przyklad)
+        # button.place(relx=0.5, rely=0.775, anchor=customtkinter.CENTER)
 
 
         app.mainloop()
