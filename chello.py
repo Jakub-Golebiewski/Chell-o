@@ -1,5 +1,8 @@
 ## Projekt zbudowany na bazie python 3.7  connector  8.0.31
 
+#Problemy do rozwiązania na później:
+# Jak zaznaczasz hasło to się pokazuje
+
 import mysql.connector #connector musi być zainstalowany
 from mysql.connector import Error
 import tkinter
@@ -57,15 +60,29 @@ try:
 
 
         def Login():
-            pass #W tym miejscu ma być funkcja logowania. Pobierz login i hasło z login_entry i password_entry.
+             pass#W tym miejscu ma być funkcja logowania. Pobierz login i hasło z login_entry i password_entry.
 
         button = customtkinter.CTkButton(master=app, text="Zaloguj", command=Login)
         button.place(relx=0.5, rely=0.525, anchor=customtkinter.CENTER)
 
         def Register():
-            pass #W tym miejscu ma być funkcja Rejestrowania. Pobierz login i hasło z login_entry i password_entry.
+             #W tym miejscu ma być funkcja Rejestrowania. Pobierz login i hasło z login_entry i password_entry.
+            login = login_entry.get()
+            password = password_entry.get()
+            
+            cursor.execute("SELECT * FROM users WHERE uprawnienia = \"2\" ")
+            result = cursor.fetchall
+            if cursor.rowcount==0:
+                uprawnienia = "2"
+            else:
+                uprawnienia = "0"
+            sql = "INSERT INTO users (login, pass, uprawnienia, avatar, jezykUzytkownika, rodzajSkorkiInterfejsu, portfel) VALUES (%s, %s, %s, %s, %s, %s, %s)"
+            val = (login, password, uprawnienia, "0", "0", "0", "0")
+            cursor.execute(sql, val)
+            connection.commit()
+            print("Dodano uzytkownika")
 
-        button = customtkinter.CTkButton(master=app, text="Zarejestruj", command=Login)
+        button = customtkinter.CTkButton(master=app, text="Zarejestruj", command=Register)
         button.place(relx=0.5, rely=0.65, anchor=customtkinter.CENTER)
 
 
