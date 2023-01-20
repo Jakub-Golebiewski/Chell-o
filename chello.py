@@ -2,6 +2,9 @@ import mysql.connector
 import tkinter
 import customtkinter
 
+customtkinter.set_appearance_mode("System")
+customtkinter.set_default_color_theme("dark-blue")
+
 class MySQLConnection:
     def __init__(self, host, port, database, user, password):
         self.host = host
@@ -39,9 +42,6 @@ class MySQLConnection:
                 self.cursor.execute("CREATE TABLE IF NOT EXISTS `users` (`idUsera` int(16) NOT NULL, `login` varchar(16) NOT NULL, `pass` varchar(16) NOT NULL, `uprawnienia` int(16) NOT NULL, `avatar` int(16) NOT NULL, `jezykUzytkownika` int(16) NOT NULL, `rodzajSkorkiInterfejsu` int(16) NOT NULL, `portfel` varchar(16) NOT NULL) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;")
                 self.cursor.execute("CREATE TABLE IF NOT EXISTS `utwor` (`idUtworu` int(11) NOT NULL, `nazwaUtworu` text NOT NULL, `idAutora` int(11) NOT NULL,`idGatunku` int(11) NOT NULL,`obrazek` text NOT NULL) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;")
 
-
-
-
         except mysql.connector.Error as e:
             print("Error while connecting to MySQL", e)
             self.connection.rollback()
@@ -54,51 +54,85 @@ class MySQLConnection:
             self.connection.close()
             print("MySQL connection is closed")
 
-def Register():
-    pass
+    def register(self):
+        login = login_window.login_entry.get()
+        password = login_window.password_entry.get()
 
-def Login():
-    pass
+        self.cursor.execute("SELECT * FROM users WHERE uprawnienia = \"2\" ")
+        result = self.cursor.fetchall
+        if self.cursor.rowcount==0:
+            uprawnienia = "2"
+        else:
+            uprawnienia = "0"
+        sql = "INSERT INTO users (login, pass, uprawnienia, avatar, jezykUzytkownika, rodzajSkorkiInterfejsu, portfel) VALUES (%s, %s, %s, %s, %s, %s, %s)"
+        val = (login, password, uprawnienia, "0", "0", "0", "0")
+        self.cursor.execute(sql, val)
+        self.connection.commit()
+        print("Dodano uzytkownika")
+
+
+    def login(self):
+        login = login_window.login_entry.get()
+        password = login_window.password_entry.get()
+
+        self.cursor.execute("SELECT * FROM users WHERE login=%s AND pass=%s", (login, password))
+        result = self.cursor.fetchone()
+
+        if result:
+            print("Zalogowano")
+            login_window.spawn_main_window()
+            login_window.withdraw()
+        else:
+            pass
+
+
 
 class Interface(customtkinter.CTk):
     def __init__(self):
         super().__init__()
-        customtkinter.set_appearance_mode("System")
-        customtkinter.set_default_color_theme("dark-blue")
 
         self.geometry("400x240")
-        mainframe= customtkinter.CTkFrame(self, fg_color="#ADD8E6")
-        mainframe.grid(column=0, row=0, sticky="nsew")
+        self.mainframe= customtkinter.CTkFrame(self, fg_color="#ADD8E6")
+        self.mainframe.grid(column=0, row=0, sticky="nsew")
         self.columnconfigure(0, weight=1)
         self.rowconfigure(0, weight=1)
 
-        login_textbox = customtkinter.CTkTextbox(self, fg_color="#ADD8E6")
-        login_textbox.grid(row=0, column=0)
-        login_textbox.insert("0.0", "Podaj login i hasło")
-        login_textbox.configure(state="disabled")
+        self.login_textbox = customtkinter.CTkTextbox(self, fg_color="#ADD8E6")
+        self.login_textbox.grid(row=0, column=0)
+        self.login_textbox.insert("0.0", "Podaj login i hasło")
+        self.login_textbox.configure(state="disabled")
 
-#        login_errorbox = customtkinter.CTkTextbox(app, fg_color="#ADD8E6")
-#        self.textbox.grid(row=0, column=1, padx=(20, 0), pady=(20, 0), sticky="nsew")
-#        login_errorbox.grid(row=1, column=1)
-#        login_errorbox.insert("0.0", "Błędny login i hasło, spróbuj ponownie")
-#        login_errorbox.configure(state="disabled")
+        self.login_error_textbox = customtkinter.CTkTextbox(self, fg_color="#ADD8E6")
+        self.login_error_textbox.grid(row=0, column=0)
+        self.login_error_textbox.place(relx=0.5, rely=0.1, anchor=customtkinter.CENTER)
+        self.login_error_textbox.insert("0.0", "Błędny login lub hasło")
+        self.login_error_textbox.configure(state="disabled")
 
 
-        login_entry = customtkinter.CTkEntry(master=self, placeholder_text="Login")
-        login_entry.place(relx=0.5, rely=0.3, anchor=customtkinter.CENTER)
+        self.login_entry = customtkinter.CTkEntry(master=self, placeholder_text="login")
+        self.login_entry.place(relx=0.5, rely=0.3, anchor=customtkinter.CENTER)
 
-        password_entry = customtkinter.CTkEntry(master=self, placeholder_text="Hasło", text_color="White")
-        password_entry.place(relx=0.5, rely=0.4, anchor=customtkinter.CENTER)
+        self.password_entry = customtkinter.CTkEntry(master=self, placeholder_text="hasło", text_color="White")
+        self.password_entry.place(relx=0.5, rely=0.4, anchor=customtkinter.CENTER)
 
-        button = customtkinter.CTkButton(master=self, text="Zaloguj", command=Login)
-        button.place(relx=0.5, rely=0.525, anchor=customtkinter.CENTER)
+        self.button = customtkinter.CTkButton(master=self, text="Zaloguj", command=conn.login)
+        self.button.place(relx=0.5, rely=0.525, anchor=customtkinter.CENTER)
 
-        button = customtkinter.CTkButton(master=self, text="Zarejestruj", command=Register)
-        button.place(relx=0.5, rely=0.65, anchor=customtkinter.CENTER)
+        self.button = customtkinter.CTkButton(master=self, text="Zarejestruj", command=conn.register)
+        self.button.place(relx=0.5, rely=0.65, anchor=customtkinter.CENTER)
 
     def spawn_main_window(self):
-        main_window = customtkinter.CTkToplevel(self)
-        main_window.geometry("800x400")
+        main_window = Main_Window(self)
+
+class Main_Window(customtkinter.CTkToplevel):
+    def __init__(self, parent):
+        super().__init__(parent)
+
+        self.geometry("800x400")
+        self.mainframe= customtkinter.CTkFrame(self, fg_color="#ADD8E6")
+        self.mainframe.grid(column=0, row=0, sticky="nsew")
+        self.columnconfigure(0, weight=1)
+        self.rowconfigure(0, weight=1)
 
 
 conn = MySQLConnection('192.166.219.220', '3306', 'niewiadoma', 'niewiadoma', 'Niewiadoma2244;')
