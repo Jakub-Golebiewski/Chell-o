@@ -83,6 +83,7 @@ class MySQLConnection:
             login_window.spawn_main_window()
             login_window.withdraw()
         else:
+            login_window.login_error_textbox.configure(text_color="black")
             pass
 
 
@@ -101,13 +102,13 @@ class Interface(customtkinter.CTk):
         self.login_textbox.grid(row=0, column=0)
         self.login_textbox.insert("0.0", "Podaj login i hasło")
         self.login_textbox.configure(state="disabled")
+        self.login_textbox.place(relx=0.5, rely=0.5, anchor=customtkinter.CENTER)
 
         self.login_error_textbox = customtkinter.CTkTextbox(self, fg_color="#ADD8E6")
         self.login_error_textbox.grid(row=0, column=0)
-        self.login_error_textbox.place(relx=0.5, rely=0.1, anchor=customtkinter.CENTER)
         self.login_error_textbox.insert("0.0", "Błędny login lub hasło")
-        self.login_error_textbox.configure(state="disabled")
-
+        self.login_error_textbox.configure(state="disabled", text_color="#ADD8E6")
+        self.login_error_textbox.place(relx=0.5, rely=1.2, anchor=customtkinter.CENTER)
 
         self.login_entry = customtkinter.CTkEntry(master=self, placeholder_text="login")
         self.login_entry.place(relx=0.5, rely=0.3, anchor=customtkinter.CENTER)
