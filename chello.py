@@ -137,7 +137,7 @@ class MySQLConnection:
 class Interface(customtkinter.CTk):
     def __init__(self):
         super().__init__()
-
+        self.title("Logowanie")
         self.geometry("500x340")
         self.mainframe = customtkinter.CTkFrame(master=self)
         self.mainframe.pack(pady=20, padx=60, fill="both", expand=True)
@@ -170,7 +170,7 @@ class Interface(customtkinter.CTk):
 class Main_Window(customtkinter.CTkToplevel):
     def __init__(self, parent):
         super().__init__(parent)
-
+        self.title(conn.fetchStudioName())
         self.geometry("800x400")
         self.mainframe = customtkinter.CTkFrame(master=self)
         self.mainframe.pack(pady=20, padx=60, fill="both", expand=True)
@@ -195,7 +195,7 @@ class Main_Window(customtkinter.CTkToplevel):
 class Admin_Window(customtkinter.CTkToplevel):
     def __init__(self, parent):
         super().__init__(parent)
-
+        self.title("Administracja")
         self.geometry("800x400")
         self.mainframe = customtkinter.CTkFrame(master=self)
         self.mainframe.pack(pady=20, padx=60, fill="both", expand=True)
