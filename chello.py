@@ -166,11 +166,21 @@ class Interface(customtkinter.CTk):
     def spawn_admin_window(self):
         self.admin_window = Admin_Window(self)
 
+    def spawn_plyty_window(self):
+        main_window = Plyty_Window(self)
+
+    def spawn_gatunki_window(self):
+        main_window = Gatunki_Window(self)
+
+    def spawn_autorzy_window(self):
+        main_window = Autorzy_Window(self)
+
 
 class Main_Window(customtkinter.CTkToplevel):
     def __init__(self, parent):
         super().__init__(parent)
         self.title(conn.fetchStudioName())
+        self.focus()
         self.geometry("800x400")
         self.mainframe = customtkinter.CTkFrame(master=self)
         self.mainframe.pack(pady=20, padx=60, fill="both", expand=True)
@@ -190,6 +200,13 @@ class Main_Window(customtkinter.CTkToplevel):
         self.StudioRenameEntry.pack(pady=3, padx=10)
         self.StudioRenameButton = customtkinter.CTkButton(master=self.mainframe, text="Zmień", command=conn.studioRename)
         self.StudioRenameButton.pack(pady=3, padx=10)
+
+        self.PlytyOpen = customtkinter.CTkButton(master=self.mainframe, text="Płyty", command=login_window.spawn_plyty_window)
+        self.PlytyOpen.pack(pady=3, padx=10)
+        self.GatunkiOpen = customtkinter.CTkButton(master=self.mainframe, text="Gatunki", command=login_window.spawn_gatunki_window)
+        self.GatunkiOpen.pack(pady=3, padx=10)
+        self.AutorzyOpen = customtkinter.CTkButton(master=self.mainframe, text="Autorzy", command=login_window.spawn_autorzy_window)
+        self.AutorzyOpen.pack(pady=3, padx=10)
 
 
 class Admin_Window(customtkinter.CTkToplevel):
@@ -220,6 +237,34 @@ class Admin_Window(customtkinter.CTkToplevel):
         self.TransferSuperUserEntry.pack(pady=3, padx=10)
         self.TransferSuperUserButton = customtkinter.CTkButton(master=self.mainframe, text="Przekaż", command=conn.stankyLeg)
         self.TransferSuperUserButton.pack(pady=3, padx=10)
+
+class Plyty_Window(customtkinter.CTkToplevel):
+    def __init__(self, parent):
+        super().__init__(parent)
+        self.title("Płyty")
+        self.geometry("800x400")
+        self.mainframe = customtkinter.CTkFrame(master=self)
+        self.mainframe.pack(pady=20, padx=60, fill="both", expand=True)
+
+
+
+class Gatunki_Window(customtkinter.CTkToplevel):
+    def __init__(self, parent):
+        super().__init__(parent)
+        self.title("Gatunki")
+        self.geometry("800x400")
+        self.mainframe = customtkinter.CTkFrame(master=self)
+        self.mainframe.pack(pady=20, padx=60, fill="both", expand=True)
+
+class Autorzy_Window(customtkinter.CTkToplevel):
+    def __init__(self, parent):
+        super().__init__(parent)
+        self.title("Autorzy")
+        self.geometry("800x400")
+        self.mainframe = customtkinter.CTkFrame(master=self)
+        self.mainframe.pack(pady=20, padx=60, fill="both", expand=True)
+
+
 
 
 
