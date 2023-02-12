@@ -2,8 +2,9 @@ import mysql.connector
 import tkinter
 import customtkinter
 
-customtkinter.set_appearance_mode("System")
+customtkinter.set_appearance_mode("Dark")
 customtkinter.set_default_color_theme("dark-blue")
+
 
 class MySQLConnection:
     def __init__(self, host, port, database, user, password):
@@ -70,70 +71,156 @@ class MySQLConnection:
         self.connection.commit()
         print("Dodano uzytkownika")
 
-
     def login(self):
         login = login_window.login_entry.get()
         password = login_window.password_entry.get()
 
-        self.cursor.execute("SELECT * FROM users WHERE login=%s AND pass=%s", (login, password))
+        self.cursor.execute("SELECT uprawnienia FROM users WHERE login=%s AND pass=%s", (login, password))
         result = self.cursor.fetchone()
 
         if result:
             print("Zalogowano")
+            print(result)
             login_window.spawn_main_window()
-            login_window.withdraw()
+
+            if 2 in result:
+                login_window.spawn_admin_window()
+
+            
+
         else:
-            login_window.login_error_textbox.configure(text_color="black")
-            pass
+            login_window.login_error_label.pack(pady=10, padx=10)
+            
+    def bigUpgrade(self):
+        target = login_window.admin_window.BigUpgradeEntry.get()
+        self.cursor.execute("SELECT uprawnienia FROM users WHERE login =%s AND login=%s", (target, target))
+        result = self.cursor.fetchone()
+        if 2 in result:
+            print("Error, can't downgrade the SuperAdmin")
+        else:
+            self.cursor.execute("UPDATE users SET uprawnienia = '1' WHERE login=%s AND login=%s", (target, target))
+            self.connection.commit()
 
+    def bigDowngrade(self):
+        target = login_window.admin_window.BigDowngradeEntry.get()
+        self.cursor.execute("SELECT uprawnienia FROM users WHERE login =%s AND login=%s", (target, target))
+        result = self.cursor.fetchone()
+        if 2 in result:
+            print("Error, can't downgrade the SuperAdmin")
+        else:
+            self.cursor.execute("UPDATE users SET uprawnienia = '0' WHERE login=%s AND login=%s", (target, target))
+            self.connection.commit()
 
+    def stankyLeg(self):
+        self.cursor.execute("UPDATE users SET uprawnienia = '0' WHERE uprawnienia='2'")
+
+        target = login_window.admin_window.TransferSuperUserEntry.get()
+        self.cursor.execute("UPDATE users SET uprawnienia = '2' WHERE login=%s AND login=%s", (target, target))
+        self.connection.commit()
+
+    def fetchStudioName(self):
+        self.cursor.execute("SELECT * FROM config")
+        result = self.cursor.fetchone()
+        string_result = str(result)
+        trimmed_result = string_result.replace("(", "")
+        trimmed_result = trimmed_result.replace(")", "")
+        trimmed_result = trimmed_result.replace("'", "")
+        trimmed_result = trimmed_result.replace(",", "")
+        trimmed_result = trimmed_result.replace("0", "")
+        return trimmed_result
+
+    def studioRename(self):
+        target = login_window.main_window.StudioRenameEntry.get()
+        self.cursor.execute("UPDATE config SET nazwaStudia=%s WHERE id=%s", (target, "0"))
+        self.connection.commit()
 
 class Interface(customtkinter.CTk):
     def __init__(self):
         super().__init__()
 
-        self.geometry("400x240")
-        self.mainframe= customtkinter.CTkFrame(self, fg_color="#ADD8E6")
-        self.mainframe.grid(column=0, row=0, sticky="nsew")
-        self.columnconfigure(0, weight=1)
-        self.rowconfigure(0, weight=1)
+        self.geometry("500x340")
+        self.mainframe = customtkinter.CTkFrame(master=self)
+        self.mainframe.pack(pady=20, padx=60, fill="both", expand=True)
 
-        self.login_textbox = customtkinter.CTkTextbox(self, fg_color="#ADD8E6")
-        self.login_textbox.grid(row=0, column=0)
-        self.login_textbox.insert("0.0", "Podaj login i hasło")
-        self.login_textbox.configure(state="disabled")
-        self.login_textbox.place(relx=0.5, rely=0.5, anchor=customtkinter.CENTER)
+        self.login_label = customtkinter.CTkLabel(master=self.mainframe, text="Podaj login i hasło", font=("Arial", 12))
+        self.login_label.pack(pady=10, padx=10)
 
-        self.login_error_textbox = customtkinter.CTkTextbox(self, fg_color="#ADD8E6")
-        self.login_error_textbox.grid(row=0, column=0)
-        self.login_error_textbox.insert("0.0", "Błędny login lub hasło")
-        self.login_error_textbox.configure(state="disabled", text_color="#ADD8E6")
-        self.login_error_textbox.place(relx=0.5, rely=1.2, anchor=customtkinter.CENTER)
+        self.login_entry = customtkinter.CTkEntry(master=self.mainframe, placeholder_text="login")
+        self.login_entry.pack(pady=3, padx=10)
 
-        self.login_entry = customtkinter.CTkEntry(master=self, placeholder_text="login")
-        self.login_entry.place(relx=0.5, rely=0.3, anchor=customtkinter.CENTER)
+        self.password_entry = customtkinter.CTkEntry(master=self.mainframe, placeholder_text="hasło", show="*")
+        self.password_entry.pack(pady=3, padx=10)
 
-        self.password_entry = customtkinter.CTkEntry(master=self, placeholder_text="hasło", text_color="White")
-        self.password_entry.place(relx=0.5, rely=0.4, anchor=customtkinter.CENTER)
+        self.login_button = customtkinter.CTkButton(master=self.mainframe, text="Zaloguj", command=conn.login)
+        self.login_button.pack(pady=3, padx=10)
 
-        self.button = customtkinter.CTkButton(master=self, text="Zaloguj", command=conn.login)
-        self.button.place(relx=0.5, rely=0.525, anchor=customtkinter.CENTER)
+        self.register_button = customtkinter.CTkButton(master=self.mainframe, text="Zarejestruj", command=conn.register)
+        self.register_button.pack(pady=3, padx=10)
 
-        self.button = customtkinter.CTkButton(master=self, text="Zarejestruj", command=conn.register)
-        self.button.place(relx=0.5, rely=0.65, anchor=customtkinter.CENTER)
+        self.login_error_label = customtkinter.CTkLabel(master=self.mainframe, text="Błędny login lub hasło", font=("Arial", 12))
+        
 
     def spawn_main_window(self):
-        main_window = Main_Window(self)
+        self.main_window = Main_Window(self)
+
+    def spawn_admin_window(self):
+        self.admin_window = Admin_Window(self)
+
 
 class Main_Window(customtkinter.CTkToplevel):
     def __init__(self, parent):
         super().__init__(parent)
 
         self.geometry("800x400")
-        self.mainframe= customtkinter.CTkFrame(self, fg_color="#ADD8E6")
-        self.mainframe.grid(column=0, row=0, sticky="nsew")
-        self.columnconfigure(0, weight=1)
-        self.rowconfigure(0, weight=1)
+        self.mainframe = customtkinter.CTkFrame(master=self)
+        self.mainframe.pack(pady=20, padx=60, fill="both", expand=True)
+
+        self.username = login_window.login_entry.get()
+        self.WelcomeMessage = "Witaj " + self.username
+        self.WelcomeMessageLabel = customtkinter.CTkLabel(master=self.mainframe, text=self.WelcomeMessage, font=("Arial", 16))
+        self.WelcomeMessageLabel.pack(pady=10, padx=10)
+
+        self.fetchedName = conn.fetchStudioName()
+        self.studioName = customtkinter.CTkLabel(master=self.mainframe, text=self.fetchedName, font=("Arial", 24))
+        self.studioName.pack(pady=10, padx=10)
+
+        self.StudioRenameLabel = customtkinter.CTkLabel(master=self.mainframe, text="Zmień nazwę studia", font=("Arial", 12))
+        self.StudioRenameLabel.pack(pady=10, padx=10)
+        self.StudioRenameEntry = customtkinter.CTkEntry(master=self.mainframe, placeholder_text="nowa nazwa")
+        self.StudioRenameEntry.pack(pady=3, padx=10)
+        self.StudioRenameButton = customtkinter.CTkButton(master=self.mainframe, text="Zmień", command=conn.studioRename)
+        self.StudioRenameButton.pack(pady=3, padx=10)
+
+
+class Admin_Window(customtkinter.CTkToplevel):
+    def __init__(self, parent):
+        super().__init__(parent)
+
+        self.geometry("800x400")
+        self.mainframe = customtkinter.CTkFrame(master=self)
+        self.mainframe.pack(pady=20, padx=60, fill="both", expand=True)
+
+        self.BigUpgradeLabel = customtkinter.CTkLabel(master=self.mainframe, text="Podnieś uprawnienia użytkownika do Admin", font=("Arial", 12))
+        self.BigUpgradeLabel.pack(pady=10, padx=10)
+        self.BigUpgradeEntry = customtkinter.CTkEntry(master=self.mainframe, placeholder_text="nazwa użytkownika")
+        self.BigUpgradeEntry.pack(pady=3, padx=10)
+        self.BigUpgradeButton = customtkinter.CTkButton(master=self.mainframe, text="Podnieś", command=conn.bigUpgrade)
+        self.BigUpgradeButton.pack(pady=3, padx=10)
+
+        self.BigDowngradeLabel = customtkinter.CTkLabel(master=self.mainframe, text="Obniż uprawnienia użytkownika do User", font=("Arial", 12))
+        self.BigDowngradeLabel.pack(pady=10, padx=10)
+        self.BigDowngradeEntry = customtkinter.CTkEntry(master=self.mainframe, placeholder_text="nazwa użytkownika")
+        self.BigDowngradeEntry.pack(pady=3, padx=10)
+        self.BigDowngradeButton = customtkinter.CTkButton(master=self.mainframe, text="Obniż", command=conn.bigDowngrade)
+        self.BigDowngradeButton.pack(pady=3, padx=10)
+
+        self.TransferSuperUserLabel = customtkinter.CTkLabel(master=self.mainframe, text="Przekaż uprawnienia SuperAdmin", font=("Arial", 12))
+        self.TransferSuperUserLabel.pack(pady=10, padx=10)
+        self.TransferSuperUserEntry = customtkinter.CTkEntry(master=self.mainframe, placeholder_text="nazwa użytkownika")
+        self.TransferSuperUserEntry.pack(pady=3, padx=10)
+        self.TransferSuperUserButton = customtkinter.CTkButton(master=self.mainframe, text="Przekaż", command=conn.stankyLeg)
+        self.TransferSuperUserButton.pack(pady=3, padx=10)
+
 
 
 conn = MySQLConnection('192.166.219.220', '3306', 'niewiadoma', 'niewiadoma', 'Niewiadoma2244;')
